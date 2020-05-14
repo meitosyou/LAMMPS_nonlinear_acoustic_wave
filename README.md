@@ -44,6 +44,10 @@ log.lammps
 
 outp.txt
 >こちらが私が設定した出力
+time source_loc detec_loc temperature volume energy の順
+source_loc 左端の原子群の平均位置
+detec_loc　波動の伝搬を読み取るために中央当たりの原子群を指定。その粒子群の平均位置
+
 スペースを,に変換した後
 python読み込み用のcsvファイルを作る
 cat unti.txt | tr " " "," > outp.csv 
