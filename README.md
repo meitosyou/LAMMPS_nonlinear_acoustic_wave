@@ -1,4 +1,5 @@
 # LAMMPS_nonlinear_acoustic_wave
+Defaultというファイルの中にスパコンで動かすためのセットが全部入っています。
 
 outerview
 check num of arrage
