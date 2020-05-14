@@ -47,11 +47,17 @@ outp.txt
 time source_loc detec_loc temperature volume energy の順
 source_loc 左端の原子群の平均位置
 detec_loc　波動の伝搬を読み取るために中央当たりの原子群を指定。その粒子群の平均位置
-
 スペースを,に変換した後
 python読み込み用のcsvファイルを作る
 cat unti.txt | tr " " "," > outp.csv 
 とコマンド入力
+
+in_python.sh
+>スパコン内でpythonのモジュールを一時的にダウンロードするためのファイル
+./in_python.sh
+とコマンド入力すれば、自動化できたはずですがちょっとうまくできませんでした。
+代わりにファイルをvimなどで開いてスクリプトをコピーしcommandに貼り付ければできると思います。
+
 FFT_oritin.py
 > python FFT_origin.py
 とコマンド入力すると必要な情報と非線形パラメータβが出てくる。
