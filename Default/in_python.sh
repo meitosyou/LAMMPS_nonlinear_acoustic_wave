@@ -1,0 +1,7 @@
+#!/bin/sh
+module load cray-python/3.6.5.3
+python -m venv my_env_dir_python3
+source my_env_dir_python3/bin/activate
+python -m pip install matplotlib
+python -m pip install scipy
+python -m pip install numpy

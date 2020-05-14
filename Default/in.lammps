@@ -1,0 +1,63 @@
+#################################
+#two psrts have to be corrected
+#Vacancy >> type : Fe Fe Fe Fe 
+#Cu      >> type : Fe Fe Fe Fe Cu
+#################################
+
+####
+#variable nvt_temp      equal 0.1                     # Temperature
+#variable npt_temp      equal 0.1
+####
+
+variable mass         equal 55.845                    # Atomic Mass
+variable press        equal 1.01325                    # Atomic Mass
+
+units       metal 
+atom_style  atomic
+boundary sf p p
+#timestep    0.001
+timestep    0.01
+read_data   ./Fe.lat
+
+pair_style  eam/alloy
+pair_coeff  * * ./FeCuNi.eam.alloy Fe Fe Fe Fe 
+#pair_coeff  * * ./new_potential/FeCuNi.eam.alloy Fe Fe Fe Fe Cu
+mass        1 ${mass}
+
+
+group source type 2
+group detector type 3
+variable s equal xcm(source,x)
+variable d equal xcm(detector,x)
+variable t equal temp
+variable v equal vol
+variable e equal etotal
+variable i equal time
+variable FIG string iranai
+#
+#
+fix 1 all nve
+thermo 1
+#thermo_style custom time v_sox v_dex temp vol etotal v_FIG
+#
+fix extra all print 1 "$i $s $d $t $v $e" file outp.txt
+#
+#
+minimize 1.0e-16 1.0e-16 10000 10000
+#
+###dump 0 all cfg 10 all.*.cfg mass type xs ys zs id
+###dump_modify 0 element Fe Fe Fe Fe
+#dump_modify 0 element Fe Fe Fe Fe Cu
+#
+
+fix 2 source move wiggle 0.1 0.0 0.0 2.0
+#
+run 800
+unfix 2
+run 1200
+#run 8000 
+#unfix 2 
+#run 12000
+###################################################
+#
+#
