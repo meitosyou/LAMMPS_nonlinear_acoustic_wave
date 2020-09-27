@@ -1,0 +1,111 @@
+#################################
+#two psrts have to be corrected
+#Vacancy >> type : Fe Fe Fe Fe 
+#Cu      >> type : Fe Fe Fe Fe Cu
+#################################
+
+####
+#variable nvt_temp      equal 0.1                     # Temperature
+#variable npt_temp      equal 0.1
+####
+#系の基本状態を定める。詳細はLAMMPSのサイトを参照
+
+variable press        equal 1.01325                    # Atomic Mass
+
+units       metal 
+atom_style  atomic
+#xyz方向すべて周期的境界条件にしている。x方向のみ真空領域を作り非周期性を出している
+boundary p p p
+
+#計算量に問題がないのなら0.001[ps]にするのが望ましい。
+#timestep    0.001
+timestep    0.01
+read_data   ./Fe.lat
+
+#ポテンシャルファイルからポテンシャルを与えている。
+pair_style  eam/alloy
+pair_coeff  * * ./FeCuNi.eam.alloy Fe Fe Fe Fe Fe
+#pair_coeff  * * ./new_potential/FeCuNi.eam.alloy Fe Fe Fe Fe Cu
+#mass        *4 ${mass}
+#mass        5 58.454 correct value!!!
+
+#原子グループに名前を与えている。
+group source type 2
+group detector type 3
+group edge type 5
+
+#欲しい情報に記号を割り当てファイル出力させている。
+variable s equal xcm(source,x)
+variable d equal xcm(detector,x)
+variable t equal temp
+variable v equal vol
+variable e equal etotal
+variable i equal time
+variable FIG string iranai
+#
+
+#nveで系を設定し粒子をminimizeで沈静化させている。minimizeが甘いと超音波信号が不規則に揺れることがある。
+fix 1 all nve
+thermo 1
+#thermo_style custom time v_sox v_dex temp vol etotal v_FIG
+#
+fix extra all print 1 "$i $s $d $t $v $e" file outp.txt
+#
+#
+minimize 1.0e-18 1.0e-18 100000 100000
+#
+
+#スナップショットが欲しかったらここのインデントを解除する
+###dump 0 all cfg 10 all.*.cfg mass type xs ys zs id
+###dump_modify 0 element Fe Fe Fe Fe
+#dump_modify 0 element Fe Fe Fe Fe Cu
+
+
+#系の右恥の原子を固定する
+#fix 9 edge recenter INIT INIT INIT
+
+############################################################
+#variable A equal .10
+#variable T equal 2.0
+#variable omega equal 2.0*PI/$T
+##j equal x , k equal v
+
+
+### 完全な波の導入
+fix 2 source move wiggle 0.01 0.0 0.0 2.0
+#fix 2 source move wiggle 0.1 0.0 0.0 2.0
+##same
+#variable j equal swiggle(0.0,$A,$T)
+#variable k equal v_omega*($A-cwiggle(0.0,$A,$T))
+#fix 2 source move variable v_j NULL NULL v_k NULL NULL
+
+
+### 部分波の導入
+###1d
+#variable j equal v_A*v_omega*v_i
+#variable k equal v_A*v_omega
+#fix 2 source move variable v_j NULL NULL v_k NULL NULL
+
+###2d
+#variable j equal v_A*(v_omega^2)*(v_i^2)/2
+#variable k equal v_A*(v_omega^2)*v_i
+#fix 2 source move variable v_j NULL NULL v_k NULL NULL
+
+
+#時間発展をするところ
+run 800
+unfix 2
+
+#sourceに超音波を導入したあとは系が平行移動しないように系をもとの位置に固定しておく必要がある。
+fix 3 source recenter INIT INIT INIT
+
+run 1200
+#run 8000 
+#unfix 2 
+#run 12000
+
+#cscの説明に書いてあることだが、コノのプログラムはSLURMのバッチファイルによって動かす。
+#計算規模によって dev.sh S_M.sh large.sh をうまく使い分けること
+#うまく行けば slurm... というファイル、log.lammps、outp.txt が生成される。
+
+###################################################
